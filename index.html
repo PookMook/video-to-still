@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Frame Blender</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .drop-zone {
+            border: 3px dashed #ddd;
+            border-radius: 10px;
+            padding: 60px 20px;
+            text-align: center;
+            margin: 30px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .drop-zone.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: scale(1.02);
+        }
+
+        .drop-zone i {
+            font-size: 4em;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone.dragover i {
+            color: #667eea;
+        }
+
+        .video-container {
+            display: none;
+            padding: 30px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .timeline {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            position: relative;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .timeline-progress {
+            height: 100%;
+            background: #667eea;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: -6px;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .range-markers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+        }
+
+        .start-marker, .end-marker {
+            position: absolute;
+            top: -6px;
+            width: 20px;
+            height: 20px;
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .start-marker {
+            background: #ff6b6b;
+        }
+
+        .end-marker {
+            background: #feca57;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #a0aec0;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #718096;
+            transform: translateY(-2px);
+        }
+
+        .frame-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .progress-container {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .result-container {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .result-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .info-text {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎆 Video Frame Blender</h1>
+            <p>Drop a video, scrub through frames, and blend them into beautiful still images</p>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+            <i>📹</i>
+            <h3>Drop your video file here</h3>
+            <p>or click to browse</p>
+            <input type="file" id="videoInput" accept="video/*" style="display: none;">
+        </div>
+
+        <div class="video-container" id="videoContainer">
+            <div class="video-wrapper">
+                <video id="video" controls></video>
+            </div>
+
+            <div class="controls">
+                <div class="frame-info">
+                    <div>
+                        <strong>Current Frame:</strong> <span id="currentFrame">0</span> / <span id="totalFrames">0</span>
+                    </div>
+                    <div>
+                        <strong>Time:</strong> <span id="currentTime">00:00</span> / <span id="totalTime">00:00</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Timeline</label>
+                    <div class="timeline" id="timeline">
+                        <div class="timeline-progress" id="timelineProgress"></div>
+                        <div class="timeline-marker" id="timelineMarker"></div>
+                        <div class="range-markers">
+                            <div class="start-marker" id="startMarker"></div>
+                            <div class="end-marker" id="endMarker"></div>
+                        </div>
+                    </div>
+                    <div class="info-text">
+                        Red marker: Start frame | Yellow marker: End frame | Blue marker: Current position
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Frame Navigation</label>
+                    <div class="button-group">
+                        <button class="btn-secondary" id="prevFrame">⏮ Previous Frame</button>
+                        <button class="btn-secondary" id="nextFrame">Next Frame ⏭</button>
+                        <button class="btn-primary" id="setStart">Set Start Point</button>
+                        <button class="btn-primary" id="setEnd">Set End Point</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Selection: <span id="selectionInfo">No selection</span></label>
+                    <div class="button-group">
+                        <button class="btn-success" id="blendFrames">🎨 Blend Frames</button>
+                        <button class="btn-secondary" id="reset">Reset Selection</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-container" id="progressContainer">
+                <label>Processing frames...</label>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="progressText">0%</div>
+            </div>
+
+            <div class="result-container" id="resultContainer">
+                <h3>✨ Blended Result</h3>
+                <img id="resultImage" class="result-image" alt="Blended frames">
+                <div style="margin-top: 15px;">
+                    <button class="btn-success" id="downloadResult">📥 Download Image</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        class VideoFrameBlender {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.startFrame = 0;
+                this.endFrame = 0;
+                this.currentFrame = 0;
+                this.totalFrames = 0;
+                this.fps = 30;
+                this.duration = 0;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+            }
+
+            initializeElements() {
+                this.dropZone = document.getElementById('dropZone');
+                this.videoInput = document.getElementById('videoInput');
+                this.videoContainer = document.getElementById('videoContainer');
+                this.timeline = document.getElementById('timeline');
+                this.timelineProgress = document.getElementById('timelineProgress');
+                this.timelineMarker = document.getElementById('timelineMarker');
+                this.startMarker = document.getElementById('startMarker');
+                this.endMarker = document.getElementById('endMarker');
+                this.currentFrameSpan = document.getElementById('currentFrame');
+                this.totalFramesSpan = document.getElementById('totalFrames');
+                this.currentTimeSpan = document.getElementById('currentTime');
+                this.totalTimeSpan = document.getElementById('totalTime');
+                this.selectionInfo = document.getElementById('selectionInfo');
+                this.progressContainer = document.getElementById('progressContainer');
+                this.progressFill = document.getElementById('progressFill');
+                this.progressText = document.getElementById('progressText');
+                this.resultContainer = document.getElementById('resultContainer');
+                this.resultImage = document.getElementById('resultImage');
+            }
+
+            setupEventListeners() {
+                // Drag and drop
+                this.dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
+                this.dropZone.addEventListener('dragleave', this.handleDragLeave.bind(this));
+                this.dropZone.addEventListener('drop', this.handleDrop.bind(this));
+                this.dropZone.addEventListener('click', () => this.videoInput.click());
+                this.videoInput.addEventListener('change', this.handleFileSelect.bind(this));
+
+                // Video events
+                this.video.addEventListener('loadedmetadata', this.handleVideoLoaded.bind(this));
+                this.video.addEventListener('timeupdate', this.updateTimelinePosition.bind(this));
+
+                // Controls
+                document.getElementById('prevFrame').addEventListener('click', this.previousFrame.bind(this));
+                document.getElementById('nextFrame').addEventListener('click', this.nextFrame.bind(this));
+                document.getElementById('setStart').addEventListener('click', this.setStartPoint.bind(this));
+                document.getElementById('setEnd').addEventListener('click', this.setEndPoint.bind(this));
+                document.getElementById('blendFrames').addEventListener('click', this.blendFrames.bind(this));
+                document.getElementById('reset').addEventListener('click', this.resetSelection.bind(this));
+                document.getElementById('downloadResult').addEventListener('click', this.downloadResult.bind(this));
+
+                // Timeline
+                this.timeline.addEventListener('click', this.handleTimelineClick.bind(this));
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                this.dropZone.classList.add('dragover');
+            }
+
+            handleDragLeave(e) {
+                e.preventDefault();
+                this.dropZone.classList.remove('dragover');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                this.dropZone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.loadVideo(files[0]);
+                }
+            }
+
+            handleFileSelect(e) {
+                if (e.target.files.length > 0) {
+                    this.loadVideo(e.target.files[0]);
+                }
+            }
+
+            loadVideo(file) {
+                const url = URL.createObjectURL(file);
+                this.video.src = url;
+                this.videoContainer.style.display = 'block';
+            }
+
+            handleVideoLoaded() {
+                this.duration = this.video.duration;
+                this.fps = 30; // Estimate, could be improved
+                this.totalFrames = Math.floor(this.duration * this.fps);
+                this.endFrame = this.totalFrames - 1;
+
+                this.canvas.width = this.video.videoWidth;
+                this.canvas.height = this.video.videoHeight;
+
+                this.updateDisplay();
+                this.updateMarkers();
+            }
+
+            updateDisplay() {
+                this.currentFrame = Math.floor(this.video.currentTime * this.fps);
+                this.currentFrameSpan.textContent = this.currentFrame;
+                this.totalFramesSpan.textContent = this.totalFrames;
+                this.currentTimeSpan.textContent = this.formatTime(this.video.currentTime);
+                this.totalTimeSpan.textContent = this.formatTime(this.duration);
+                this.updateSelectionInfo();
+            }
+
+            updateSelectionInfo() {
+                if (this.startFrame === 0 && this.endFrame === this.totalFrames - 1) {
+                    this.selectionInfo.textContent = 'Full video selected';
+                } else {
+                    const frameCount = this.endFrame - this.startFrame + 1;
+                    this.selectionInfo.textContent = `Frames ${this.startFrame} - ${this.endFrame} (${frameCount} frames)`;
+                }
+            }
+
+            updateTimelinePosition() {
+                const progress = this.video.currentTime / this.duration;
+                this.timelineProgress.style.width = `${progress * 100}%`;
+                this.timelineMarker.style.left = `${progress * 100}%`;
+                this.updateDisplay();
+            }
+
+            updateMarkers() {
+                const startPercent = (this.startFrame / this.totalFrames) * 100;
+                const endPercent = (this.endFrame / this.totalFrames) * 100;
+                this.startMarker.style.left = `${startPercent}%`;
+                this.endMarker.style.left = `${endPercent}%`;
+            }
+
+            handleTimelineClick(e) {
+                const rect = this.timeline.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                const targetTime = percent * this.duration;
+                this.video.currentTime = targetTime;
+            }
+
+            previousFrame() {
+                const targetTime = Math.max(0, this.video.currentTime - 1/this.fps);
+                this.video.currentTime = targetTime;
+            }
+
+            nextFrame() {
+                const targetTime = Math.min(this.duration, this.video.currentTime + 1/this.fps);
+                this.video.currentTime = targetTime;
+            }
+
+            setStartPoint() {
+                this.startFrame = this.currentFrame;
+                if (this.startFrame >= this.endFrame) {
+                    this.endFrame = Math.min(this.totalFrames - 1, this.startFrame + 1);
+                }
+                this.updateMarkers();
+                this.updateSelectionInfo();
+            }
+
+            setEndPoint() {
+                this.endFrame = this.currentFrame;
+                if (this.endFrame <= this.startFrame) {
+                    this.startFrame = Math.max(0, this.endFrame - 1);
+                }
+                this.updateMarkers();
+                this.updateSelectionInfo();
+            }
+
+            resetSelection() {
+                this.startFrame = 0;
+                this.endFrame = this.totalFrames - 1;
+                this.updateMarkers();
+                this.updateSelectionInfo();
+            }
+
+            async blendFrames() {
+                const frameCount = this.endFrame - this.startFrame + 1;
+                if (frameCount <= 0) return;
+
+                this.progressContainer.style.display = 'block';
+                this.resultContainer.style.display = 'none';
+
+                // Create accumulation canvas for blending
+                const blendCanvas = document.createElement('canvas');
+                blendCanvas.width = this.canvas.width;
+                blendCanvas.height = this.canvas.height;
+                const blendCtx = blendCanvas.getContext('2d');
+
+                // Initialize with black background
+                blendCtx.fillStyle = 'black';
+                blendCtx.fillRect(0, 0, blendCanvas.width, blendCanvas.height);
+
+                for (let i = 0; i < frameCount; i++) {
+                    const frameIndex = this.startFrame + i;
+                    const targetTime = frameIndex / this.fps;
+                    
+                    // Update progress
+                    const progress = ((i + 1) / frameCount) * 100;
+                    this.progressFill.style.width = `${progress}%`;
+                    this.progressText.textContent = `${Math.round(progress)}%`;
+
+                    // Seek to frame
+                    await this.seekToTime(targetTime);
+                    
+                    // Draw frame to canvas
+                    this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+                    
+                    // Blend with accumulation canvas using screen blend mode
+                    blendCtx.globalCompositeOperation = 'screen';
+                    blendCtx.drawImage(this.canvas, 0, 0);
+                    
+                    // Small delay to allow UI updates
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+
+                // Convert to final image
+                const dataURL = blendCanvas.toDataURL('image/png');
+                this.resultImage.src = dataURL;
+                this.resultContainer.style.display = 'block';
+                this.progressContainer.style.display = 'none';
+            }
+
+            seekToTime(targetTime) {
+                return new Promise((resolve) => {
+                    const handleSeeked = () => {
+                        this.video.removeEventListener('seeked', handleSeeked);
+                        resolve();
+                    };
+                    this.video.addEventListener('seeked', handleSeeked);
+                    this.video.currentTime = targetTime;
+                });
+            }
+
+            downloadResult() {
+                const link = document.createElement('a');
+                link.download = 'blended_frames.png';
+                link.href = this.resultImage.src;
+                link.click();
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new VideoFrameBlender();
+        });
+    </script>
+</body>
+</html> 
