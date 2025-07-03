@@ -13,61 +13,62 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #232946 0%, #16161a 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #f4f4f4;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            background: #181824;
             border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #ff6b6b, #feca57);
-            color: white;
+            background: linear-gradient(135deg, #232946, #3a3a5d);
+            color: #f4f4f4;
             padding: 30px;
             text-align: center;
         }
 
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        .header h1, .header h2 {
+            color: #f4f4f4;
         }
 
         .header p {
             font-size: 1.1em;
-            opacity: 0.9;
+            opacity: 0.85;
         }
 
         .drop-zone {
-            border: 3px dashed #ddd;
+            border: 3px dashed #444;
             border-radius: 10px;
             padding: 60px 20px;
             text-align: center;
             margin: 30px;
             transition: all 0.3s ease;
-            background: #fafafa;
+            background: #232946;
+            color: #f4f4f4;
         }
 
         .drop-zone.dragover {
-            border-color: #667eea;
-            background: #f0f4ff;
+            border-color: #a786ff;
+            background: #282a36;
             transform: scale(1.02);
         }
 
         .drop-zone i {
             font-size: 4em;
-            color: #ddd;
+            color: #444;
             margin-bottom: 20px;
         }
 
         .drop-zone.dragover i {
-            color: #667eea;
+            color: #a786ff;
         }
 
         .video-container {
@@ -87,10 +88,11 @@
             width: 100%;
             height: auto;
             display: block;
+            background: #000;
         }
 
         .controls {
-            background: #f8f9fa;
+            background: #232946;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
@@ -104,22 +106,23 @@
             display: block;
             margin-bottom: 5px;
             font-weight: 600;
-            color: #333;
+            color: #e0e0e0;
         }
 
         .timeline {
             width: 100%;
             height: 8px;
-            background: #ddd;
+            background: #232946;
             border-radius: 4px;
             position: relative;
             margin: 10px 0;
             cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
         }
 
         .timeline-progress {
             height: 100%;
-            background: #667eea;
+            background: #a786ff;
             border-radius: 4px;
             position: relative;
         }
@@ -129,11 +132,11 @@
             top: -6px;
             width: 20px;
             height: 20px;
-            background: #667eea;
-            border: 3px solid white;
+            background: #a786ff;
+            border: 3px solid #232946;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
         .range-markers {
@@ -149,10 +152,10 @@
             top: -6px;
             width: 20px;
             height: 20px;
-            border: 3px solid white;
+            border: 3px solid #232946;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
 
         .start-marker {
@@ -180,32 +183,35 @@
         }
 
         .btn-primary {
-            background: #667eea;
-            color: white;
+            background: #a786ff;
+            color: #181824;
         }
 
         .btn-primary:hover {
-            background: #5a6fd8;
+            background: #7c5fe6;
+            color: #fff;
             transform: translateY(-2px);
         }
 
         .btn-success {
             background: #48bb78;
-            color: white;
+            color: #181824;
         }
 
         .btn-success:hover {
             background: #38a169;
+            color: #fff;
             transform: translateY(-2px);
         }
 
         .btn-secondary {
-            background: #a0aec0;
-            color: white;
+            background: #444;
+            color: #f4f4f4;
         }
 
         .btn-secondary:hover {
-            background: #718096;
+            background: #232946;
+            color: #a786ff;
             transform: translateY(-2px);
         }
 
@@ -213,10 +219,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #e2e8f0;
+            background: #232946;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
+            color: #f4f4f4;
         }
 
         .progress-container {
@@ -227,14 +234,14 @@
         .progress-bar {
             width: 100%;
             height: 20px;
-            background: #e2e8f0;
+            background: #232946;
             border-radius: 10px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: linear-gradient(90deg, #a786ff, #48bb78);
             transition: width 0.3s ease;
         }
 
@@ -242,16 +249,18 @@
             display: none;
             text-align: center;
             padding: 20px;
-            background: #f8f9fa;
+            background: #232946;
             border-radius: 10px;
             margin-top: 20px;
+            color: #f4f4f4;
         }
 
         .result-image {
             max-width: 100%;
             height: auto;
             border-radius: 10px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            background: #181824;
         }
 
         #canvas {
@@ -260,8 +269,73 @@
 
         .info-text {
             font-size: 0.9em;
-            color: #666;
+            color: #bcbcbc;
             margin-top: 10px;
+        }
+
+        input[type="range"] {
+            accent-color: #a786ff;
+            background: #232946;
+        }
+
+        input[type="file"], select, input[type="range"] {
+            color: #f4f4f4;
+            background: #232946;
+            border: 1px solid #444;
+        }
+
+        input[type="file"]::-webkit-file-upload-button {
+            background: #232946;
+            color: #f4f4f4;
+            border: 1px solid #444;
+        }
+
+        input, select, button, label {
+            font-family: inherit;
+        }
+
+        #compositeGallery {
+            background: #181824;
+            border-radius: 10px;
+        }
+
+        #compositeGalleryContainer .header {
+            background: linear-gradient(135deg, #232946, #48bb78);
+        }
+
+        /* Spinner styles */
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #a786ff;
+            border-top: 4px solid #232946;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto 10px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        a.btn-success {
+            display: inline-block;
+            text-decoration: none;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            background: #48bb78;
+            color: #181824;
+            transition: all 0.3s ease;
+        }
+        a.btn-success:hover {
+            background: #38a169;
+            color: #fff;
+            transform: translateY(-2px);
         }
     </style>
 </head>
@@ -338,6 +412,7 @@
                     <div class="button-group">
                         <button class="btn-success" id="blendFrames">🎨 Blend Frames</button>
                         <button class="btn-secondary" id="reset">Reset Selection</button>
+                        <button class="btn-primary" id="createAnimation">🎞️ Create Animation</button>
                     </div>
                 </div>
 
@@ -346,7 +421,7 @@
                     <div class="info-text" style="font-size: 0.85em; line-height: 1.4;">
                         <strong>Navigation:</strong> ← → (frame by frame) | ↑ ↓ (5s skip) | Space (play/pause)<br>
                         <strong>Selection:</strong> S (set start) | E (set end) | R (reset)<br>
-                        <strong>Actions:</strong> B (blend frames)
+                        <strong>Actions:</strong> B (blend frames) | A (create animation)
                     </div>
                 </div>
             </div>
@@ -405,6 +480,7 @@
 
     <canvas id="canvas"></canvas>
 
+    <script src="gif.js"></script>
     <script>
         class VideoFrameBlender {
             constructor() {
@@ -458,6 +534,21 @@
                 this.compositeBlendResultImage = document.getElementById('compositeBlendResultImage');
                 this.downloadCompositeBlendBtn = document.getElementById('downloadCompositeBlend');
                 this.saveCompositeBlendBtn = document.getElementById('saveCompositeBlend');
+                this.createAnimationBtn = document.getElementById('createAnimation');
+                this.animationResultContainer = document.createElement('div');
+                this.animationResultContainer.className = 'result-container';
+                this.animationResultContainer.style.display = 'none';
+                this.animationResultContainer.innerHTML = `
+                    <h3>🎞️ Animation Result</h3>
+                    <div class="spinner" id="animationSpinner" style="display:none;"></div>
+                    <img id="animationResultImage" class="result-image" alt="Animation result">
+                    <div style="margin-top: 15px;">
+                        <a id="downloadAnimation" class="btn-success" download="animation.gif">📥 Download Animation</a>
+                    </div>
+                `;
+                document.querySelector('.container').appendChild(this.animationResultContainer);
+                this.animationResultImage = this.animationResultContainer.querySelector('#animationResultImage');
+                this.downloadAnimationLink = this.animationResultContainer.querySelector('#downloadAnimation');
             }
 
             setupEventListeners() {
@@ -510,6 +601,7 @@
                 this.compositeBrightness = parseFloat(this.compositeBrightnessSlider.value);
                 this.downloadCompositeBlendBtn.addEventListener('click', this.downloadCompositeBlend.bind(this));
                 this.saveCompositeBlendBtn.addEventListener('click', this.saveCompositeBlend.bind(this));
+                this.createAnimationBtn.addEventListener('click', this.createAnimation.bind(this));
             }
 
             handleDragOver(e) {
@@ -719,7 +811,7 @@
                 if (!this.video.src) return;
 
                 // Prevent default behavior for arrow keys to avoid page scrolling
-                if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(e.code)) {
+                if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " ", "KeyA"].includes(e.code)) {
                     e.preventDefault();
                 }
 
@@ -761,6 +853,10 @@
                     case 'KeyR':
                         // Reset selection
                         this.resetSelection();
+                        break;
+                    case 'KeyA':
+                        // Create animation
+                        this.createAnimation();
                         break;
                 }
             }
@@ -899,6 +995,68 @@
                 this.composites.push(this.compositeBlendDataURL);
                 this.selectedCompositeIndexes.add(this.composites.length - 1);
                 this.updateCompositeGallery();
+            }
+
+            async createAnimation() {
+                const frameCount = this.endFrame - this.startFrame + 1;
+                if (frameCount <= 0) return;
+                this.animationResultContainer.style.display = 'block';
+                this.animationResultImage.src = '';
+                this.animationResultImage.style.display = 'none';
+                this.downloadAnimationLink.style.display = 'none';
+                // Show progress and spinner
+                this.animationResultContainer.querySelector('h3').textContent = '🎞️ Creating Animation...';
+                const spinner = document.getElementById('animationSpinner');
+                spinner.style.display = 'inline-block';
+                try {
+                    // Prepare GIF
+                    const gif = new window.GIF({
+                        workers: 2,
+                        quality: 10,
+                        width: this.canvas.width,
+                        height: this.canvas.height,
+                        workerScript: 'gif.worker.js'
+                    });
+                    for (let i = 0; i < frameCount; i++) {
+                        const frameIndex = this.startFrame + i;
+                        const targetTime = frameIndex / this.fps;
+                        await this.seekToTime(targetTime);
+                        this.ctx.save();
+                        this.ctx.filter = `brightness(${this.brightnessSlider.value})`;
+                        this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+                        this.ctx.restore();
+                        gif.addFrame(this.canvas, {copy: true, delay: 1000/this.fps});
+                    }
+                    gif.on('finished', (blob) => {
+                        const url = URL.createObjectURL(blob);
+                        this.animationResultImage.src = url;
+                        this.animationResultImage.style.display = 'block';
+                        this.downloadAnimationLink.href = url;
+                        this.downloadAnimationLink.style.display = 'inline-block';
+                        this.animationResultContainer.querySelector('h3').textContent = '🎞️ Animation Result';
+                        spinner.style.display = 'none';
+                    });
+                    gif.on('abort', () => {
+                        this.animationResultContainer.querySelector('h3').textContent = '❌ Animation creation aborted.';
+                        spinner.style.display = 'none';
+                        this.animationResultImage.style.display = 'none';
+                        this.downloadAnimationLink.style.display = 'none';
+                    });
+                    gif.on('error', (err) => {
+                        this.animationResultContainer.querySelector('h3').textContent = '❌ Animation creation failed.';
+                        spinner.style.display = 'none';
+                        this.animationResultImage.style.display = 'none';
+                        this.downloadAnimationLink.style.display = 'none';
+                        alert('GIF creation failed: ' + err);
+                    });
+                    gif.render();
+                } catch (err) {
+                    this.animationResultContainer.querySelector('h3').textContent = '❌ Animation creation failed.';
+                    spinner.style.display = 'none';
+                    this.animationResultImage.style.display = 'none';
+                    this.downloadAnimationLink.style.display = 'none';
+                    alert('GIF creation failed: ' + err);
+                }
             }
         }
 
