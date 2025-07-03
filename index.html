@@ -320,10 +320,33 @@
                 </div>
 
                 <div class="control-group">
+                    <label for="blendMode">Blend Mode</label>
+                    <select id="blendMode" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+                        <option value="screen">Screen (Brighten)</option>
+                        <option value="lighten" selected>Lighten (Max)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="brightnessSlider">Brightness</label>
+                    <input type="range" id="brightnessSlider" min="0.2" max="2" step="0.01" value="1" style="width: 200px;">
+                    <span id="brightnessValue">1.00</span>
+                </div>
+
+                <div class="control-group">
                     <label>Selection: <span id="selectionInfo">No selection</span></label>
                     <div class="button-group">
                         <button class="btn-success" id="blendFrames">🎨 Blend Frames</button>
                         <button class="btn-secondary" id="reset">Reset Selection</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Keyboard Shortcuts</label>
+                    <div class="info-text" style="font-size: 0.85em; line-height: 1.4;">
+                        <strong>Navigation:</strong> ← → (frame by frame) | ↑ ↓ (5s skip) | Space (play/pause)<br>
+                        <strong>Selection:</strong> S (set start) | E (set end) | R (reset)<br>
+                        <strong>Actions:</strong> B (blend frames)
                     </div>
                 </div>
             </div>
@@ -341,7 +364,41 @@
                 <img id="resultImage" class="result-image" alt="Blended frames">
                 <div style="margin-top: 15px;">
                     <button class="btn-success" id="downloadResult">📥 Download Image</button>
+                    <button class="btn-primary" id="saveComposite">💾 Save Composite</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="compositeGalleryContainer" style="margin-top: 30px; display: none;">
+        <div class="header" style="background: linear-gradient(135deg, #48bb78, #667eea);">
+            <h2>🖼️ Composite Gallery</h2>
+            <p>Saved composites. Select multiple to blend them together!</p>
+        </div>
+        <div id="compositeGallery" style="display: flex; flex-wrap: wrap; gap: 20px; padding: 20px;"></div>
+        <div style="padding: 20px;">
+            <button class="btn-primary" id="blendComposites">Blend Selected Composites</button>
+        </div>
+
+        <div class="control-group" style="padding: 0 20px 20px 20px;">
+            <label for="compositeBlendMode">Composite Blend Mode</label>
+            <select id="compositeBlendMode" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+                <option value="screen">Screen (Brighten)</option>
+                <option value="lighten" selected>Lighten (Max)</option>
+            </select>
+        </div>
+        <div class="control-group" style="padding: 0 20px 20px 20px;">
+            <label for="compositeBrightnessSlider">Composite Brightness</label>
+            <input type="range" id="compositeBrightnessSlider" min="0.2" max="2" step="0.01" value="1" style="width: 200px;">
+            <span id="compositeBrightnessValue">1.00</span>
+        </div>
+
+        <div class="result-container" id="compositeBlendResultContainer" style="display: none;">
+            <h3>🧩 Composite Blend Preview</h3>
+            <img id="compositeBlendResultImage" class="result-image" alt="Composite blend result">
+            <div style="margin-top: 15px;">
+                <button class="btn-success" id="downloadCompositeBlend">📥 Download Composite Blend</button>
+                <button class="btn-primary" id="saveCompositeBlend">💾 Save as Composite</button>
             </div>
         </div>
     </div>
@@ -360,6 +417,10 @@
                 this.totalFrames = 0;
                 this.fps = 30;
                 this.duration = 0;
+                this.composites = [];
+                this.selectedCompositeIndexes = new Set();
+                this.compositeGalleryContainer = document.getElementById('compositeGalleryContainer');
+                this.compositeGallery = document.getElementById('compositeGallery');
                 
                 this.initializeElements();
                 this.setupEventListeners();
@@ -384,6 +445,19 @@
                 this.progressText = document.getElementById('progressText');
                 this.resultContainer = document.getElementById('resultContainer');
                 this.resultImage = document.getElementById('resultImage');
+                this.blendModeSelect = document.getElementById('blendMode');
+                this.brightnessSlider = document.getElementById('brightnessSlider');
+                this.brightnessValue = document.getElementById('brightnessValue');
+                this.saveCompositeBtn = document.getElementById('saveComposite');
+                this.blendCompositesBtn = document.getElementById('blendComposites');
+                // Composite blend controls
+                this.compositeBlendModeSelect = document.getElementById('compositeBlendMode');
+                this.compositeBrightnessSlider = document.getElementById('compositeBrightnessSlider');
+                this.compositeBrightnessValue = document.getElementById('compositeBrightnessValue');
+                this.compositeBlendResultContainer = document.getElementById('compositeBlendResultContainer');
+                this.compositeBlendResultImage = document.getElementById('compositeBlendResultImage');
+                this.downloadCompositeBlendBtn = document.getElementById('downloadCompositeBlend');
+                this.saveCompositeBlendBtn = document.getElementById('saveCompositeBlend');
             }
 
             setupEventListeners() {
@@ -409,6 +483,33 @@
 
                 // Timeline
                 this.timeline.addEventListener('click', this.handleTimelineClick.bind(this));
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', this.handleKeyDown.bind(this));
+
+                // Blend mode and brightness
+                this.blendModeSelect.addEventListener('change', () => {
+                    this.selectedBlendMode = this.blendModeSelect.value;
+                });
+                this.selectedBlendMode = this.blendModeSelect.value;
+                this.brightnessSlider.addEventListener('input', () => {
+                    this.brightnessValue.textContent = Number(this.brightnessSlider.value).toFixed(2);
+                });
+                this.brightness = parseFloat(this.brightnessSlider.value);
+
+                this.saveCompositeBtn.addEventListener('click', this.saveComposite.bind(this));
+                this.blendCompositesBtn.addEventListener('click', this.blendSelectedComposites.bind(this));
+                // Composite blend controls
+                this.compositeBlendModeSelect.addEventListener('change', () => {
+                    this.selectedCompositeBlendMode = this.compositeBlendModeSelect.value;
+                });
+                this.selectedCompositeBlendMode = this.compositeBlendModeSelect.value;
+                this.compositeBrightnessSlider.addEventListener('input', () => {
+                    this.compositeBrightnessValue.textContent = Number(this.compositeBrightnessSlider.value).toFixed(2);
+                });
+                this.compositeBrightness = parseFloat(this.compositeBrightnessSlider.value);
+                this.downloadCompositeBlendBtn.addEventListener('click', this.downloadCompositeBlend.bind(this));
+                this.saveCompositeBlendBtn.addEventListener('click', this.saveCompositeBlend.bind(this));
             }
 
             handleDragOver(e) {
@@ -542,14 +643,17 @@
                 blendCanvas.height = this.canvas.height;
                 const blendCtx = blendCanvas.getContext('2d');
 
-                // Initialize with black background
-                blendCtx.fillStyle = 'black';
-                blendCtx.fillRect(0, 0, blendCanvas.width, blendCanvas.height);
+                if (this.selectedBlendMode === 'screen') {
+                    blendCtx.fillStyle = 'black';
+                    blendCtx.fillRect(0, 0, blendCanvas.width, blendCanvas.height);
+                } else if (this.selectedBlendMode === 'lighten') {
+                    blendCtx.clearRect(0, 0, blendCanvas.width, blendCanvas.height);
+                }
 
                 for (let i = 0; i < frameCount; i++) {
                     const frameIndex = this.startFrame + i;
                     const targetTime = frameIndex / this.fps;
-                    
+
                     // Update progress
                     const progress = ((i + 1) / frameCount) * 100;
                     this.progressFill.style.width = `${progress}%`;
@@ -557,21 +661,37 @@
 
                     // Seek to frame
                     await this.seekToTime(targetTime);
-                    
-                    // Draw frame to canvas
+
+                    // Draw frame to canvas with brightness filter
+                    this.ctx.save();
+                    this.ctx.filter = `brightness(${this.brightnessSlider.value})`;
                     this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
-                    
-                    // Blend with accumulation canvas using screen blend mode
-                    blendCtx.globalCompositeOperation = 'screen';
-                    blendCtx.drawImage(this.canvas, 0, 0);
-                    
-                    // Small delay to allow UI updates
+                    this.ctx.restore();
+
+                    if (this.selectedBlendMode === 'screen') {
+                        blendCtx.globalCompositeOperation = 'screen';
+                        blendCtx.drawImage(this.canvas, 0, 0);
+                        blendCtx.globalCompositeOperation = 'source-over';
+                    } else if (this.selectedBlendMode === 'lighten') {
+                        const blendImageData = blendCtx.getImageData(0, 0, blendCanvas.width, blendCanvas.height);
+                        const frameImageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+                        const bData = blendImageData.data;
+                        const fData = frameImageData.data;
+                        for (let j = 0; j < bData.length; j += 4) {
+                            bData[j] = Math.max(bData[j], fData[j]);
+                            bData[j+1] = Math.max(bData[j+1], fData[j+1]);
+                            bData[j+2] = Math.max(bData[j+2], fData[j+2]);
+                            bData[j+3] = Math.max(bData[j+3], fData[j+3]);
+                        }
+                        blendCtx.putImageData(blendImageData, 0, 0);
+                    }
+
                     await new Promise(resolve => setTimeout(resolve, 10));
                 }
 
                 // Convert to final image
-                const dataURL = blendCanvas.toDataURL('image/png');
-                this.resultImage.src = dataURL;
+                this.finalBlendDataURL = blendCanvas.toDataURL('image/png');
+                this.resultImage.src = this.finalBlendDataURL;
                 this.resultContainer.style.display = 'block';
                 this.progressContainer.style.display = 'none';
             }
@@ -594,10 +714,191 @@
                 link.click();
             }
 
+            handleKeyDown(e) {
+                // Only handle keyboard shortcuts if video is loaded
+                if (!this.video.src) return;
+
+                // Prevent default behavior for arrow keys to avoid page scrolling
+                if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(e.code)) {
+                    e.preventDefault();
+                }
+
+                switch (e.code) {
+                    case 'ArrowLeft':
+                        this.previousFrame();
+                        break;
+                    case 'ArrowRight':
+                        this.nextFrame();
+                        break;
+                    case 'ArrowUp':
+                        // Fast backward (5 seconds)
+                        this.video.currentTime = Math.max(0, this.video.currentTime - 5);
+                        break;
+                    case 'ArrowDown':
+                        // Fast forward (5 seconds)
+                        this.video.currentTime = Math.min(this.duration, this.video.currentTime + 5);
+                        break;
+                    case 'Space':
+                        // Play/pause
+                        if (this.video.paused) {
+                            this.video.play();
+                        } else {
+                            this.video.pause();
+                        }
+                        break;
+                    case 'KeyS':
+                        // Set start point
+                        this.setStartPoint();
+                        break;
+                    case 'KeyE':
+                        // Set end point
+                        this.setEndPoint();
+                        break;
+                    case 'KeyB':
+                        // Blend frames
+                        this.blendFrames();
+                        break;
+                    case 'KeyR':
+                        // Reset selection
+                        this.resetSelection();
+                        break;
+                }
+            }
+
             formatTime(seconds) {
                 const mins = Math.floor(seconds / 60);
                 const secs = Math.floor(seconds % 60);
                 return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            saveComposite() {
+                if (!this.finalBlendDataURL) return;
+                this.composites.push(this.finalBlendDataURL);
+                // Automatically select the new composite
+                this.selectedCompositeIndexes.add(this.composites.length - 1);
+                this.updateCompositeGallery();
+            }
+
+            updateCompositeGallery() {
+                if (this.composites.length === 0) {
+                    this.compositeGalleryContainer.style.display = 'none';
+                    return;
+                }
+                this.compositeGalleryContainer.style.display = 'block';
+                this.compositeGallery.innerHTML = '';
+                this.composites.forEach((dataURL, idx) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.display = 'flex';
+                    wrapper.style.flexDirection = 'column';
+                    wrapper.style.alignItems = 'center';
+                    wrapper.style.width = '180px';
+                    const img = document.createElement('img');
+                    img.src = dataURL;
+                    img.style.maxWidth = '160px';
+                    img.style.maxHeight = '120px';
+                    img.style.borderRadius = '8px';
+                    img.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+                    img.alt = `Composite ${idx+1}`;
+                    const label = document.createElement('label');
+                    label.style.marginTop = '8px';
+                    label.style.fontSize = '0.95em';
+                    label.textContent = `Composite ${idx+1}`;
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.style.marginTop = '8px';
+                    checkbox.checked = this.selectedCompositeIndexes.has(idx);
+                    checkbox.addEventListener('change', () => {
+                        if (checkbox.checked) {
+                            this.selectedCompositeIndexes.add(idx);
+                        } else {
+                            this.selectedCompositeIndexes.delete(idx);
+                        }
+                    });
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(label);
+                    wrapper.appendChild(checkbox);
+                    this.compositeGallery.appendChild(wrapper);
+                });
+            }
+
+            async blendSelectedComposites() {
+                const selected = Array.from(this.selectedCompositeIndexes);
+                if (selected.length < 2) return;
+                const blendMode = this.compositeBlendModeSelect.value;
+                const brightness = parseFloat(this.compositeBrightnessSlider.value);
+                // Use the size of the first composite
+                const img0 = new window.Image();
+                img0.src = this.composites[selected[0]];
+                await new Promise(res => { img0.onload = res; });
+                const width = img0.width;
+                const height = img0.height;
+                const blendCanvas = document.createElement('canvas');
+                blendCanvas.width = width;
+                blendCanvas.height = height;
+                const blendCtx = blendCanvas.getContext('2d');
+                if (blendMode === 'screen') {
+                    blendCtx.fillStyle = 'black';
+                    blendCtx.fillRect(0, 0, width, height);
+                } else if (blendMode === 'lighten') {
+                    blendCtx.clearRect(0, 0, width, height);
+                }
+                for (let i = 0; i < selected.length; i++) {
+                    const idx = selected[i];
+                    const img = new window.Image();
+                    img.src = this.composites[idx];
+                    await new Promise(res => { img.onload = res; });
+                    // Draw with brightness filter to temp canvas
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = width;
+                    tempCanvas.height = height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.save();
+                    tempCtx.filter = `brightness(${brightness})`;
+                    tempCtx.drawImage(img, 0, 0, width, height);
+                    tempCtx.restore();
+                    if (blendMode === 'screen') {
+                        blendCtx.globalCompositeOperation = 'screen';
+                        blendCtx.drawImage(tempCanvas, 0, 0, width, height);
+                        blendCtx.globalCompositeOperation = 'source-over';
+                    } else if (blendMode === 'lighten') {
+                        // Manual lighten blend
+                        const blendImageData = blendCtx.getImageData(0, 0, width, height);
+                        const frameImageData = tempCtx.getImageData(0, 0, width, height);
+                        const bData = blendImageData.data;
+                        const fData = frameImageData.data;
+                        for (let j = 0; j < bData.length; j += 4) {
+                            bData[j] = Math.max(bData[j], fData[j]);
+                            bData[j+1] = Math.max(bData[j+1], fData[j+1]);
+                            bData[j+2] = Math.max(bData[j+2], fData[j+2]);
+                            bData[j+3] = Math.max(bData[j+3], fData[j+3]);
+                        }
+                        blendCtx.putImageData(blendImageData, 0, 0);
+                    }
+                }
+                // Show result in composite blend preview
+                this.compositeBlendDataURL = blendCanvas.toDataURL('image/png');
+                this.compositeBlendResultImage.src = this.compositeBlendDataURL;
+                this.compositeBlendResultContainer.style.display = 'block';
+                // Optionally, auto-scroll to preview
+                window.scrollTo({ top: this.compositeBlendResultContainer.offsetTop - 40, behavior: 'smooth' });
+                // Update gallery in case user wants to save/blend again
+                this.updateCompositeGallery();
+            }
+
+            downloadCompositeBlend() {
+                if (!this.compositeBlendDataURL) return;
+                const link = document.createElement('a');
+                link.download = 'composite_blend.png';
+                link.href = this.compositeBlendDataURL;
+                link.click();
+            }
+
+            saveCompositeBlend() {
+                if (!this.compositeBlendDataURL) return;
+                this.composites.push(this.compositeBlendDataURL);
+                this.selectedCompositeIndexes.add(this.composites.length - 1);
+                this.updateCompositeGallery();
             }
         }
 
